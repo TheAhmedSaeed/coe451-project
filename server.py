@@ -3,18 +3,12 @@
 import socket
 import threading
 
-from gameLogic import checkInputValidity, calculateWinner, drawBoard, pickALocation
+from gameLogic import checkInputValidity, calculateWinner, drawBoard, pickALocation,makeMove
+from helper import getMsgLength,HEADER,ADDRESS,FORMAT,SERVER,INNITIAL_BOARD,SERVER_PLAYER,CLIENT_PLAYER
 
-HEADER = 64
-PORT = 5050
-SERVER = socket.gethostbyname(socket.gethostname())
-ADDRESS = (SERVER, PORT)
-FORMAT = 'utf-8'
-DESCONNECT_MESSAGE = "!DISCONNECT"
 
-innitial_board = ['1', '2', '3',
-                  '4', '5', '6',
-                  '7', '8', '9']
+
+
 
 board = ['', '', '',
         '', '', '',
@@ -26,14 +20,74 @@ server.bind(ADDRESS)
 
 
 def handle_client(connection, address):
+    global board
+    print("Game started")
+    # startingMsg1 = f"[NEW Game] {address} is playing \n"
     
-    connection.send(f"[NEW Game] {address} is playing \n".encode(FORMAT))
-    connection.send("I am X and you are O, please select a location to start playing\n".encode(FORMAT))
-    connection.send(drawBoard(innitial_board).encode(FORMAT))
+
+
+    startingMsg2 = drawBoard(INNITIAL_BOARD)
+    startingMsgLength2 = getMsgLength(startingMsg2)
+    connection.send(startingMsgLength2)
+    connection.send(startingMsg2.encode(FORMAT))
+
+    startingMsg = "I am X and you are O, please select a location to start playing\n"
+    startingMsgLength = getMsgLength(startingMsg)
+    connection.send(startingMsgLength)
+    connection.send(startingMsg.encode(FORMAT))
+    
+    
     connected = True
     while connected:
-        location_selection = connection.recv(2048).decode()
-        print(location_selection)
+
+        msg_length = connection.recv(HEADER).decode(FORMAT)
+        print(f'Message Length = {msg_length}')
+        if(msg_length):
+            msg_length = int(msg_length)
+            location_selection = connection.recv(msg_length).decode(FORMAT)
+            print(location_selection)
+            if(checkInputValidity(location_selection, board)):
+                
+                #first we make the move for the player and check if they won and we send them back the board
+                board = makeMove(int(location_selection) -1,CLIENT_PLAYER,board)
+                connection.send(getMsgLength(drawBoard(board)))
+                connection.send(drawBoard(board).encode(FORMAT))
+
+
+                winner = calculateWinner(board)
+                if(winner == CLIENT_PLAYER):
+                    winningMsg = "You won, congrats 👏"
+                    connection.send(getMsgLength(winningMsg))
+                    connection.send(winningMsg.encode(FORMAT))
+                
+                # Then we make a move ourself and check if we won and send the board back to the player 
+                makeMove(pickALocation(board),SERVER_PLAYER,board)
+                connection.send(getMsgLength(drawBoard(board)))
+                connection.send(drawBoard(board).encode(FORMAT))
+
+                winner = calculateWinner(board)
+                if(winner == SERVER_PLAYER):
+                    winningMsg = "I won, good luck next time"
+                    connection.send(getMsgLength(winningMsg))
+                    connection.send(winningMsg.encode(FORMAT))
+            
+                promptingMsg = "It is your turn, please select a cell"
+                connection.send(getMsgLength(promptingMsg))
+                connection.send(promptingMsg.encode(FORMAT))
+
+            else: 
+                errorMsg = "Wrong choise.. please select a number from 1 to 9  and you can't select an already selected cell"
+                connection.send(getMsgLength(errorMsg))
+                connection.send(errorMsg.encode(FORMAT))
+                
+
+
+
+
+
+
+
+
         # msg_length = connection.recv(HEADER).decode(FORMAT)
         # print(msg_length)
         # if(msg_length):

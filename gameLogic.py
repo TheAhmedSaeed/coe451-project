@@ -1,3 +1,5 @@
+# this file containts function which help with the game logic
+
 # returns a string of the board to be printed to the user
 from random import randrange
 def drawBoard(board):
@@ -20,6 +22,17 @@ def drawBoard(board):
 
         printedBoard += "\n"
         return printedBoard
+
+
+# a function to make a move
+def makeMove(index,player,board):
+    index = int(index)
+    if(player == "x"):
+        board[index] = player
+    elif(player == "o"):
+        board[index] = player
+    
+    return board
 
 
 # calculates  the winner
@@ -58,6 +71,7 @@ def calculateWinner(board):
 
 # checks for the chosen location validity 
 def checkInputValidity(location,board):
+    location = int(location)
     #index is location -1
     location -=1
     if(location > 9 or location < 0):

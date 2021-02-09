@@ -2,23 +2,37 @@
 
 import socket
 
-HEADER = 64
-PORT = 5050
-FORMAT = 'utf-8'
-DESCONNECT_MESSAGE = "!DISCONNECT"
-SERVER = socket.gethostbyname(socket.gethostname())
-ADDRESS = (SERVER, PORT)
+from helper import getMsgLength,HEADER,ADDRESS,FORMAT
 
 
 client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-client.connect(ADDRESS)
 
 
-def send(msg):
-    message = msg.encode(FORMAT)
-    client.send(message)
-    print(client.recv(2048).decode(FORMAT))
-    print(client.recv(2048).decode(FORMAT))
 
 
-send("hi")
+
+def start():
+    client.connect(ADDRESS)
+    
+    #recieving first 2 innitial messages
+    
+    connected = True
+    while connected:
+        msg_length = client.recv(HEADER).decode(FORMAT)
+        print(msg_length)
+        if(msg_length):
+            msg_length = int(msg_length)
+            recieveddMsg = client.recv(msg_length).decode(FORMAT)
+            print(recieveddMsg)
+            if("won" in recieveddMsg):
+                print("Gamed ended")
+                client.close()
+                connected= False
+            elif("select" in recieveddMsg): 
+                location = input("Enter your selecetion: \n")
+                locationLength = getMsgLength(location)
+                client.send(locationLength)
+                client.send(location.encode(FORMAT))
+
+
+start()

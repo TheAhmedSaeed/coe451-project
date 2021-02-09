@@ -19,7 +19,6 @@ def start():
     connected = True
     while connected:
         msg_length = client.recv(HEADER).decode(FORMAT)
-        print(msg_length)
         if(msg_length):
             msg_length = int(msg_length)
             recieveddMsg = client.recv(msg_length).decode(FORMAT)

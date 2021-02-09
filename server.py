@@ -41,11 +41,9 @@ def handle_client(connection, address):
     while connected:
 
         msg_length = connection.recv(HEADER).decode(FORMAT)
-        print(f'Message Length = {msg_length}')
         if(msg_length):
             msg_length = int(msg_length)
             location_selection = connection.recv(msg_length).decode(FORMAT)
-            print(location_selection)
             if(checkInputValidity(location_selection, board)):
                 
                 #first we make the move for the player and check if they won and we send them back the board

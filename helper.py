@@ -5,7 +5,7 @@ import socket
 
 HEADER = 200
 FORMAT = 'utf-8'
-PORT = 5050
+PORT = 3000
 SERVER = socket.gethostbyname(socket.gethostname())
 SERVER_ADDRESS = (SERVER, PORT)
 

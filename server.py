@@ -19,7 +19,9 @@ server.bind(SERVER_ADDRESS)
 
 def handle_client(connection, address):
     global board
-    print("Game started with " + address)
+
+    initialMsg = f"Game started with {address} is playing"
+    print(initialMsg)
     # startingMsg1 = f"[NEW Game] {address} is playing \n"
     
 

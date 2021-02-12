@@ -1,8 +1,7 @@
 # this is the player (client) file
-
 import socket
 
-from helper import getMsgLength,HEADER,ADDRESS,FORMAT
+from helper import getMsgLength,HEADER,SERVER_ADDRESS,FORMAT
 
 
 client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -12,7 +11,8 @@ client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
 
 def start():
-    client.connect(ADDRESS)
+    print("Player connected to ", SERVER_ADDRESS)
+    client.connect(SERVER_ADDRESS)
     
     #recieving first 2 innitial messages
     

@@ -4,24 +4,22 @@ import socket
 import threading
 
 from gameLogic import checkInputValidity, calculateWinner, drawBoard, pickALocation,makeMove
-from helper import getMsgLength,HEADER,ADDRESS,FORMAT,SERVER,INNITIAL_BOARD,SERVER_PLAYER,CLIENT_PLAYER
+from helper import getMsgLength,HEADER,SERVER_ADDRESS,FORMAT,SERVER,INNITIAL_BOARD,SERVER_PLAYER,CLIENT_PLAYER
 
-
-
-
-
+# inoitial board
 board = ['', '', '',
         '', '', '',
          '', '', '']
 
 
+# conntecting server to the network
 server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-server.bind(ADDRESS)
+server.bind(SERVER_ADDRESS)
 
 
 def handle_client(connection, address):
     global board
-    print("Game started")
+    print("Game started with " + address)
     # startingMsg1 = f"[NEW Game] {address} is playing \n"
     
 
@@ -79,23 +77,6 @@ def handle_client(connection, address):
                 connection.send(errorMsg.encode(FORMAT))
                 
 
-
-
-
-
-
-
-
-        # msg_length = connection.recv(HEADER).decode(FORMAT)
-        # print(msg_length)
-        # if(msg_length):
-            # msg_length = int(msg_length)
-            # msg = connection.recv(msg_length).decode(FORMAT)
-            # if(msg == DESCONNECT_MESSAGE):
-                # connected = False
-
-            # print(f"[{ADDRESS}] {msg}")
-            # connection.send("Message recieved".encode(FORMAT))
 
 
 def start(): 

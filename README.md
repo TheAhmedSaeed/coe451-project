@@ -10,7 +10,7 @@
  * The server should now be waiting for the client to start the game. 
  
  
-2-  cd to src and run:  "python3 client.py" to start the the cliennt and connect to the server to start playing
+2-  While leaving the server running. Open another terminal and cd to src and run:  "python3 client.py" to start the the cliennt and connect to the server to start playing
 
 
 3- Now you have both the client and server up and running. The server will prompt you to choose a location to play ( you are the client ). 

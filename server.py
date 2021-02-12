@@ -40,6 +40,8 @@ def handle_client(connection, address):
     connected = True
     while connected:
 
+       # We recieve the 1st msg that contains the length of the upconing msg. 
+       # Both parties agree to recieve the header first which has an ugreed upon size (HEADER)
         msg_length = connection.recv(HEADER).decode(FORMAT)
         if(msg_length):
             msg_length = int(msg_length)

@@ -1,5 +1,9 @@
 # A client server tic tac toe game using python
 
+# What you need 
+- The game is written in python so you need to install python3 to play the game
+- Both Server and client can be in the same machine so, no need to VMs
+
 # How to play
 1- cd to src  and run:  "python3 server.py" to start the server
 

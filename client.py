@@ -18,31 +18,50 @@ def start():
     client.connect(SERVER_ADDRESS)
     
     
+
     iv = Random.new().read(AES.block_size)
     keyBytes = bytes.fromhex(KEYHEX)
     cipher = AES.new(keyBytes,AES.MODE_CBC,iv)
 
     
     connected = True
+
+    # boolean vriables to control the flow of comminication
     ivWasSent = False
-    wasStartingMsg1Recieved = False
-    wasStartingMsg2Recieved = False
+    startingMsg1WasRecieved = False
+    startingMsg2WasRecieved = False
+
+
+    # The server tells the client before hand that the first 
+    # two handshakes (if you will) will have this length 
+    FIRSTMSGLENGTH = 64
+    SECONDMSGLENGTH = 80
+
+    
+
     while connected:
 
-        if( ivWasSent and not wasStartingMsg1Recieved):
-            recieveddMsg = client.recv(64)
-
+        # If we have sent the IV but have not recieved the 1st message AS AGREED beforehand
+        if( ivWasSent and not startingMsg1WasRecieved):
+            recieveddMsg = client.recv(FIRSTMSGLENGTH)
+            print("Ciphertext recieved from the server {}".format(recieveddMsg))
             msg = unpad(cipher.decrypt(recieveddMsg),AES.block_size)
-            print(msg.decode())
-            wasStartingMsg1Recieved = True
+            print("Plain text after decrypting\n {}".format(msg.decode()))
+            startingMsg1WasRecieved = True
 
-        elif(ivWasSent and not wasStartingMsg2Recieved):
-            recieveddMsg = client.recv(80)
+        # If we have sent the IV but have not recieved the 2nd message AS AGREED beforehand
+        elif(ivWasSent and not startingMsg2WasRecieved):
+            recieveddMsg = client.recv(SECONDMSGLENGTH)
+            print("Ciphertext recieved from the server {}".format(recieveddMsg.hex()))
             msg = unpad(cipher.decrypt(recieveddMsg),AES.block_size)
+            print("Pain text after decrypting")
             print(msg.decode())
-            wasStartingMsg2Recieved = True
+            startingMsg2WasRecieved = True
+            
+            # This piece of code is executed only once. When we recieve the 2nd msg and start playing
+            # In other words, this is only the first selecion
+
             location = input("Enter your selecetion: \n")
-
             cipher = AES.new(keyBytes,AES.MODE_CBC,iv)
             locationEncrypted = cipher.encrypt(pad(str.encode(location),AES.block_size))
             client.send(locationEncrypted)
@@ -50,11 +69,14 @@ def start():
 
 
         else:
-
         # We recieve the 1st msg that contains the length of the upconing msg. 
        # Both parties agree to recieve the header first which has an ugreed upon size
             if(ivWasSent):
                 msg_length = client.recv(HEADER)
+            
+            #If we have:
+            # 1. Sent the IV
+            # 2. Recieved the first 2 messages
             else:
                 msg_length = client.recv(HEADER).decode(FORMAT)
 
@@ -63,8 +85,6 @@ def start():
                 recieveddMsg = client.recv(msg_length).decode(FORMAT)
                 print(recieveddMsg)
                 if( "IV" in recieveddMsg):
-                    ivLength = getMsgLengthForBytes(iv)
-                    client.send(ivLength)
                     client.send(iv)
                     ivWasSent = True
                 elif("won" in recieveddMsg):
@@ -73,8 +93,10 @@ def start():
                     connected= False
                 elif("select" in recieveddMsg): 
                     location = input("Enter your selecetion: \n")
+                    print("Location selected {}".format(location))
                     cipher = AES.new(keyBytes,AES.MODE_CBC,iv)
                     locationEncrypted = cipher.encrypt(pad(str.encode(location),AES.block_size))
+                    # Here we snd the encrypted location
                     client.send(locationEncrypted)
 
 

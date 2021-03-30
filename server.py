@@ -33,26 +33,34 @@ def handle_client(connection, address):
     
     
     connected = True
-    hasIVBeenRecieved = False
-    while connected:
 
+
+    # ًWe will use this variable to block the comminication untill an iv has recieved from the client
+    IVHasBeenRecieved = False
+    
+    IVLENGTH = LOCATIONSELECTIONLENGTH = 16
+
+
+    while connected:
        # We recieve the 1st msg that contains the length of the upconing msg. 
        # Both parties agree to recieve the header first which has an ugreed upon size (HEADER)
-        if(not hasIVBeenRecieved):
-            msg_length = connection.recv(HEADER).decode(FORMAT)
+        
+        # Before recieving any thing. We ask the client to send the IV
+        if(not IVHasBeenRecieved):
+            msg_recieved = connection.recv(IVLENGTH)
+        
         else:
-            msg_length = connection.recv(16)
-        if(msg_length):
+            msg_recieved = connection.recv(LOCATIONSELECTIONLENGTH)
+
+        if(msg_recieved):
+            if(not IVHasBeenRecieved):
+                iv = msg_recieved
             
-
-
-            if(not hasIVBeenRecieved):
-                msg_length = int(msg_length)
-                iv = connection.recv(msg_length)
                 keyBytes = bytes.fromhex(KEYHEX)
                 cipher = AES.new(keyBytes,AES.MODE_CBC,iv)
-                print("iv has been recieved")
-                hasIVBeenRecieved = True
+                print("iv has been recieved, IV is {}".format(iv.hex()))
+
+                IVHasBeenRecieved = True
                 
 
                 startingMsg2 = drawBoard(INNITIAL_BOARD)
@@ -69,9 +77,11 @@ def handle_client(connection, address):
 
             else:    
                 cipher = AES.new(keyBytes,AES.MODE_CBC,iv)
-                location_selection =  unpad(cipher.decrypt(msg_length),AES.block_size)
+                print("Cipher text for the location selection recieved {}".format(msg_recieved.hex()))
+                location_selection =  unpad(cipher.decrypt(msg_recieved),AES.block_size)
+                print("Plain text for the location selection recieved {}".format(location_selection))
 
-                print(location_selection)
+
                 if(checkInputValidity(location_selection, board)):
                     
                     #first we make the move for the player and check if they won and we send them back the board
